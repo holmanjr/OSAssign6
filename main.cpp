@@ -5,13 +5,15 @@
 #include <unordered_set>
 #include <string>
 
-int getRand(int &, int &);
-std::vector<int> generate(int &);
+int getRand(int &, int &, std::mt19937 &);
+std::vector<int> generate(int &, std::mt19937 &);
 bool contains(std::unordered_set<int> &, int &);
 void clear(std::queue<int> &q);
 
 int main() {
 
+	static std::random_device rd;
+	static std::mt19937 mt(rd());
 	auto seqSize = 1000;
 	std::vector<int> sequence;
 	std::unordered_set<int> hash;
@@ -24,7 +26,7 @@ int main() {
 	auto numAnomalies = 0;
 
 	for (unsigned int seq = 1; seq <= numSequences; ++seq) {
-		sequence = generate(seqSize);
+		sequence = generate(seqSize, mt);
 		prevPageFaults = 1000;
 		for (unsigned int memSize = 1; memSize <= maxFrames; ++memSize) {
 			hash.clear();
@@ -60,22 +62,20 @@ int main() {
 	return 0;
 }
 
-int getRand(int &low, int &high)
+int getRand(int &low, int &high, std::mt19937 &mt)
 {
-	//static std::random_device rd;
-	static std::mt19937 mt(123);
 	std::uniform_int_distribution<> dist(low, high);
 	return dist(mt);
 }
 
-std::vector<int> generate(int &size)
+std::vector<int> generate(int &size, std::mt19937 &mt)
 {
 	int low = 0;
 	int high = 250;
 	std::vector<int> r(size);
 	for (auto& e : r)
 	{
-		e = getRand(low, high);
+		e = getRand(low, high, mt);
 	}
 	return r;
 }
