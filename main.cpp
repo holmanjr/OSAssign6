@@ -57,16 +57,13 @@ int main() {
 	std::cout << anomalies << std::endl << std::endl;
 	std::cout << "Anomaly detected " << numAnomalies << " times." << std::endl;
 
-	char dummy;
-	std::cin >> dummy;
-
 	return 0;
 }
 
 int getRand(int &low, int &high)
 {
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
+	//static std::random_device rd;
+	static std::mt19937 mt(123);
 	std::uniform_int_distribution<> dist(low, high);
 	return dist(mt);
 }
