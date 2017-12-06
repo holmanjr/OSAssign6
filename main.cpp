@@ -10,6 +10,7 @@ std::vector<int> generate(int &, std::mt19937 &);
 bool contains(std::unordered_map<int, bool> &, int &);
 void clear(std::queue<int> &q);
 void falsify(std::unordered_map<int, bool> &hash);
+void initiate(std::unordered_map<int, bool> &hash, int &value);
 
 int main() {
 
@@ -23,7 +24,7 @@ int main() {
 	int prevPageFaults;
 	unsigned int numSequences = 100;
 	unsigned int maxFrames = 100;
-	std::string anomalies= "";
+	std::string anomalies = "";
 	auto numAnomalies = 0;
 
 	for (unsigned int seq = 1; seq <= numSequences; ++seq) {
@@ -33,17 +34,17 @@ int main() {
 			falsify(hash);
 			clear(frames);
 			for (auto page : sequence) {
-				auto test = hash[page];
+				auto test = contains(hash, page);
 				if (!test && frames.size() >= memSize) {
 					++currPageFaults;
-					hash.erase(frames.front());
+					hash[frames.front()] = false;
 					frames.pop();
-					hash.insert({page, true});
+					initiate(hash, page);
 					frames.push(page);
 				}
 				else if (!test && frames.size() < memSize) {
 					++currPageFaults;
-					hash.insert({page, true});
+					initiate(hash, page);
 					frames.push(page);
 				}
 			}
@@ -84,8 +85,18 @@ std::vector<int> generate(int &size, std::mt19937 &mt)
 bool contains(std::unordered_map<int, bool> &hash, int &value)
 {
 	auto p = hash.find(value);
-	if (p == hash.end()) return false;
+	if (p == hash.end() || !p->second) return false;
 	return true;
+}
+
+void initiate(std::unordered_map<int, bool> &hash, int &value) {
+	auto p = hash.find(value);
+	if (p == hash.end()) {
+		hash.insert({ value, true });
+	}
+	else {
+		hash[value] = true;
+	}
 }
 
 void clear(std::queue<int> &q)
@@ -96,7 +107,7 @@ void clear(std::queue<int> &q)
 
 void falsify(std::unordered_map<int, bool> &hash)
 {
-	for(auto value:hash){
+	for (auto& value : hash) {
 		value.second = false;
 	}
 }
