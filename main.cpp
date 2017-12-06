@@ -2,13 +2,14 @@
 #include <queue>
 #include <vector>
 #include <random>
-#include <unordered_set>
+#include <unordered_map>
 #include <string>
 
 int getRand(int &, int &, std::mt19937 &);
 std::vector<int> generate(int &, std::mt19937 &);
-bool contains(std::unordered_set<int> &, int &);
+bool contains(std::unordered_map<int, bool> &, int &);
 void clear(std::queue<int> &q);
+void falsify(std::unordered_map<int, bool> &hash);
 
 int main() {
 
@@ -16,7 +17,7 @@ int main() {
 	static std::mt19937 mt(rd());
 	auto seqSize = 1000;
 	std::vector<int> sequence;
-	std::unordered_set<int> hash;
+	std::unordered_map<int, bool> hash;
 	std::queue<int> frames;
 	int currPageFaults = 0;
 	int prevPageFaults;
@@ -29,20 +30,20 @@ int main() {
 		sequence = generate(seqSize, mt);
 		prevPageFaults = 1000;
 		for (unsigned int memSize = 1; memSize <= maxFrames; ++memSize) {
-			hash.clear();
+			falsify(hash);
 			clear(frames);
 			for (auto page : sequence) {
-				auto test = contains(hash, page);
+				auto test = hash[page];
 				if (!test && frames.size() >= memSize) {
 					++currPageFaults;
 					hash.erase(frames.front());
 					frames.pop();
-					hash.insert(page);
+					hash.insert({page, true});
 					frames.push(page);
 				}
 				else if (!test && frames.size() < memSize) {
 					++currPageFaults;
-					hash.insert(page);
+					hash.insert({page, true});
 					frames.push(page);
 				}
 			}
@@ -80,7 +81,7 @@ std::vector<int> generate(int &size, std::mt19937 &mt)
 	return r;
 }
 
-bool contains(std::unordered_set<int> &hash, int &value)
+bool contains(std::unordered_map<int, bool> &hash, int &value)
 {
 	auto p = hash.find(value);
 	if (p == hash.end()) return false;
@@ -91,4 +92,11 @@ void clear(std::queue<int> &q)
 {
 	std::queue<int> empty;
 	std::swap(q, empty);
+}
+
+void falsify(std::unordered_map<int, bool> &hash)
+{
+	for(auto value:hash){
+		value.second = false;
+	}
 }
